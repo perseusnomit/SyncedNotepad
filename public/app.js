@@ -60,7 +60,7 @@
         }, duration);
     };
 
-    // DOM Initialisierung
+    // Document Object Model (DOM) Initialisierung
     const notesArea = document.getElementById('notesArea');
     const saveBtn = document.getElementById('saveBtn');
     let saveTimeout;
