@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Notizblock</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Notizen</h1>
+            <div class="controls">
+                <button id="saveBtn" class="glass-btn">💾 Speichern</button>
+            </div>
+        </header>
+        
+        <div class="notes-grid">
+        </div>
+
+        <script>
+            const notesGrid = document.querySelector('.notes-grid');
+
+            const addNoteCard = (note) => {
+                const card = document.createElement('div');
+                card.className = `note-card ${note.device}`;
+                card.textContent = note.content;
+                notesGrid.appendChild(card);
+            };
+
+            const loadNotes = async () => {
+                try {
+                    const response = await fetch('http://192.168.0.3:3000/notes');
+                    const data = await response.json();
+                    data.forEach(addNoteCard);
+                } catch(e) {
+                    console.error('Lade Fehler:', e);
+                }
+            };
+
+            const saveNote = async (content, device) => {
+                try {
+                    await fetch('http://192.168.0.3:3000/notes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ content, device })
+                    });
+                } catch(e) {
+                    console.error('Speichern Fehler:', e);
+                }
+            };
+
+            const init = () => {
+                const newNoteForm = document.createElement('form');
+                newNoteForm.innerHTML = `
+                    <textarea placeholder="Neue Notiz..."></textarea>
+                    <button type="submit">+</button>
+                `;
+                newNoteForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const content = newNoteForm.querySelector('textarea').value;
+                    const device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'pc';
+                    await saveNote(content, device);
+                    addNoteCard({ content, device });
+                    newNoteForm.reset();
+                });
+                notesGrid.appendChild(newNoteForm);
+            };
+
+            loadNotes();
+            init();
+        </script>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
